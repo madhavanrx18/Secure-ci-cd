@@ -4,4 +4,4 @@ This tool will automatically trigger security checks whenever a developer pushes
 - Setup fastapi
 - pleae work this time
 - i did not include the secret in my webhook handler
-  - security scan enabled
+- security scan enabled
