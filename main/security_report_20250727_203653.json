@@ -1,0 +1,28 @@
+{
+  "timestamp": "2025-07-27T20:36:46.850105",
+  "sca": {
+    "tool": "safety",
+    "vulnerabilities": [],
+    "status": "skipped",
+    "error": "No requirements.txt found"
+  },
+  "secrets": {
+    "tool": "gitleaks",
+    "findings": [],
+    "status": "success",
+    "error": null
+  },
+  "sast": {
+    "tool": "bandit",
+    "issues": [],
+    "status": "success",
+    "error": null
+  },
+  "summary": {
+    "total_vulnerabilities": 0,
+    "total_secrets": 0,
+    "total_sast_issues": 0,
+    "overall_status": "pass",
+    "recommendations": []
+  }
+}

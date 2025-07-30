@@ -95,7 +95,7 @@ async def run_security_scan_background(repo_name: str, branch: str, commit_id: s
         print(f"[-] Background security scan failed for {repo_name}: {str(e)}")
 
 async def handle_scan_results(repo_name: str, branch: str, commit_id: str, 
-                            results: Dict, context: str):
+                            results: dict, context: str):
     """
     Handle security scan results - customize this for your needs
     """
@@ -140,7 +140,7 @@ def verify_signature(payload: bytes, signature: str) -> bool:
 
 # Optional: Add these notification functions as needed
 
-async def send_security_alert(repo_name: str, branch: str, commit_id: str, summary: Dict):
+async def send_security_alert(repo_name: str, branch: str, commit_id: str, summary: dict):
     """
     Send security alert notification
     Implement based on your notification preferences
@@ -166,7 +166,7 @@ async def send_security_alert(repo_name: str, branch: str, commit_id: str, summa
     
     print(f"[!] Security alert would be sent for {repo_name} (implement notification logic)")
 
-async def store_scan_results(repo_name: str, branch: str, commit_id: str, results: Dict):
+async def store_scan_results(repo_name: str, branch: str, commit_id: str, results: dict):
     """
     Store scan results in database
     Implement based on your database choice

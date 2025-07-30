@@ -2,4 +2,8 @@ fastapi
 uvicorn
 httpx
 pyyaml
-
+Flask==2.3.3
+GitPython==3.1.37
+requests==2.31.0
+safety==2.3.5          # SCA - dependency vulnerability scanning
+bandit==1.7.5          # SAST - Python static analysis

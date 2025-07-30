@@ -121,7 +121,7 @@ class SecurityScanner:
         """Secrets Scanning - Check for exposed secrets"""
         print("Running Secrets Scanning...")
         
-        secrets_results = {
+        secrets_results = { https://9d868d32c87f.ngrok-free.app
             'tool': self.config['tools']['secrets'],
             'findings': [],
             'status': 'success',
