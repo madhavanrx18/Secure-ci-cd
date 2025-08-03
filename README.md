@@ -1,216 +1,215 @@
-# CI CD Security Scanner
+# Enhanced DevSecOps Security Scanner
 
-## Overview
+A comprehensive security scanning tool that integrates multiple security analysis techniques to identify vulnerabilities in software repositories. The scanner performs Software Composition Analysis (SCA), secrets detection, Static Application Security Testing (SAST), and Insecure Direct Object Reference (IDOR) vulnerability detection with intelligent risk assessment and CVE scoring.
 
-**CI CD Security Scanner** is a composite security analysis tool combining:
+## Features
 
-* Software Composition Analysis (SCA) with CVE contextual scoring
-* Static Application Security Testing (SAST)
-* Secret detection
-* IDOR (Insecure Direct Object Reference) pattern detection
+### Core Security Scanning
+- **Software Composition Analysis (SCA)**: Identifies known vulnerabilities in dependencies using Safety
+- **Secrets Detection**: Scans for exposed credentials and sensitive information using Gitleaks
+- **Static Application Security Testing (SAST)**: Analyzes source code for security vulnerabilities using Bandit
+- **IDOR Detection**: Identifies Insecure Direct Object Reference vulnerabilities using Semgrep with custom rules
 
-It integrates external tools (`safety`, `bandit`, `gitleaks`, `semgrep`) and enriches their findings with risk classification, contextual weighting, and actionable recommendations to drive deployment decisions.
+### Risk Assessment
+- **CVE-based Scoring**: Fetches real-time CVE data from NIST NVD API for accurate risk assessment
+- **Contextual Risk Adjustment**: Adjusts risk scores based on vulnerability age, exploitability, and environment context
+- **Intelligent Action Recommendations**: Provides actionable guidance with deployment decisions (Block, Warn, Monitor, Ignore)
 
-## Key Features
-
-* CVE enrichment from NVD with score adjustment based on recency, exploitability, and context (e.g., production / internet-facing)
-* IDOR detection via Semgrep with custom rule generation and pattern classification
-* Secrets scanning with risk tiers and automatic action suggestions
-* SAST analysis via Bandit with severity/confidence mapping
-* Aggregated summary, risk assessment, and ranked recommendations
-* Deployment decision logic (BLOCK / WARN / MONITOR / ALLOW)
-* Exportable JSON report with metadata and detailed findings
-
-## Prerequisites
-
-* Python 3.8+
-* Installed CLI tools (must be on `PATH`):
-
-  * `safety`
-  * `bandit`
-  * `gitleaks`
-  * `semgrep`
-* Git (used by GitPython)
-* Python dependencies (can be installed via pip):
-
-  ```sh
-  pip install aiohttp requests GitPython
-  ```
+### Advanced Analysis
+- **Pattern-specific IDOR Detection**: Custom Semgrep rules for detecting various IDOR patterns
+- **Risk-based Decision Making**: Automated deployment recommendations based on aggregated security findings
+- **Comprehensive Reporting**: Detailed JSON reports with risk breakdowns and remediation guidance
 
 ## Installation
 
-1. Clone or copy the repository containing this script.
+### Prerequisites
+- Python 3.8 or higher
+- Git
 
-2. Install required Python packages:
+### Required Tools
+Install the following security tools:
 
-   ```sh
-   pip install -r requirements.txt
-   ```
+```bash
+# Install Python dependencies
+pip install safety bandit gitleaks semgrep aiohttp gitpython
 
-   *If `requirements.txt` is not present, at minimum:*
+# Alternative installation methods:
+# Safety: pip install safety
+# Bandit: pip install bandit
+# Gitleaks: Install from https://github.com/zricethezav/gitleaks
+# Semgrep: pip install semgrep
+```
 
-   ```sh
-   pip install aiohttp requests GitPython
-   ```
+### Python Dependencies
+```bash
+pip install -r requirements.txt
+```
 
-3. Ensure external scanners are installed:
-
-   ```sh
-   pip install semgrep bandit safety gitleaks
-   ```
+Required packages:
+- aiohttp
+- gitpython
+- requests
+- pathlib
+- asyncio
 
 ## Configuration
 
-The scanner uses a JSON configuration (optional). Default settings are embedded; to override, supply a config file path when instantiating `EnhancedSecurityScanner`.
-
-Example custom `config.json` overrides:
+Create a configuration file `config.json` to customize scanner behavior:
 
 ```json
 {
+  "tools": {
+    "sca": "safety",
+    "secrets": "gitleaks",
+    "sast": "bandit",
+    "idor": "semgrep"
+  },
   "risk_thresholds": {
     "critical_cvss_min": 9.0,
+    "high_cvss_min": 7.0,
+    "medium_cvss_min": 4.0,
     "block_on_critical": true,
-    "recent_cve_days": 45
+    "block_on_high_count": 5
   },
   "semgrep_config": {
+    "rulesets": [
+      "p/owasp-top-10",
+      "p/security-audit",
+      "p/insecure-transport"
+    ],
     "custom_idor_rules": true,
-    "rulesets": ["p/owasp-top-10"],
-    "timeout": 200
+    "timeout": 300
   },
   "cve_sources": {
-    "nvd_api_key": "YOUR_API_KEY"
+    "nvd_api_key": "your_nvd_api_key_optional"
   }
 }
 ```
 
 ## Usage
 
-### Programmatic (async)
-
-```python
-from enhanced_scanner import trigger_enhanced_security_scan
-import asyncio
-
-results = asyncio.run(
-    trigger_enhanced_security_scan(
-        repo_name="owner/repo",
-        branch="main",
-        commit_id="abcdef123456",
-        clone_url="https://github.com/owner/repo.git",
-        context={"environment": "production", "internet_facing": True}
-    )
-)
-```
-
-### CLI-style entry (as shipped)
-
-Run the module directly to scan a hardcoded repository:
-
-```sh
-python enhanced_security_scanner.py
-```
-
-*(Adjust the script’s `repo_url` or refactor to accept CLI arguments if needed.)*
-
-## Output
-
-The primary output is a structured JSON report saved as:
-
-```
-enhanced_security_report_<repo>_<branch>_<timestamp>.json
-```
-
-### Top-level report sections
-
-* `sca`, `secrets`, `sast`, `idor`: raw and enhanced findings per scan type, including risk summaries and suggested actions.
-* `summary`: consolidated risk counts, overall decision, risk score, and deployment recommendation.
-* `risk_assessment`: methodology, CVE-related metrics, and IDOR analysis breakdown.
-* `recommendations`: prioritized remediation items with titles, descriptions, guidance, and estimated effort.
-* `metadata`: repository/branch/commit/context of the scan.
-
-## Risk Model
-
-* **RiskLevel**: `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, `INFO`
-* **Action**: `BLOCK`, `WARN`, `MONITOR`, `IGNORE`
-* CVE scores are adjusted for:
-
-  * Recency (e.g., CVEs published within configured days get extra weight)
-  * Exploitability (multiplied if high)
-  * Context (production/internet-facing increases score)
-* IDOR findings are classified by pattern type with mapped risk and action logic.
-* Secrets are bucketed into high/medium/low based on keyword matching in rule IDs.
-
-## Deployment Decision Logic
-
-Overall decision is derived from aggregated actions:
-
-* `BLOCK` if any blocking issues exist
-* `WARN` if warnings exceed configured thresholds
-* `MONITOR` if non-blocking medium risks exist
-* `ALLOW` otherwise
-
-## Recommendations
-
-Recommendations are grouped by scan type and action severity:
-
-* `IMMEDIATE_FIX` for `BLOCK` level issues (critical)
-* `SCHEDULE_FIX` for `WARN` level issues
-  Each includes:
-* Priority
-* Title & description
-* Specific guidance (especially for IDOR)
-* Sample affected items
-* Estimated effort
-
-## Custom IDOR Rules
-
-Custom Semgrep rules are auto-generated for:
-
-* Direct object access without auth
-* Missing authorization checks
-* URL parameter manipulation
-* File path manipulation
-* Unsafe database access patterns
-* Session manipulation
-
-## Example Invocation
-
+### Basic Usage
 ```python
 import asyncio
 from enhanced_security_scanner import EnhancedSecurityScanner
 
-async def run():
-    scanner = EnhancedSecurityScanner(config_path="config.json")
-    results = await scanner.run_security_checks("https://github.com/example/repo.git", branch="main")
+async def main():
+    scanner = EnhancedSecurityScanner()
+    results = await scanner.run_security_checks("https://github.com/user/repo.git")
     scanner.save_enhanced_report()
 
-asyncio.run(run())
+asyncio.run(main())
 ```
 
-## Logging & Errors
+### Command Line Usage
+```bash
+python enhanced_security_scanner.py
+```
 
-* Individual scan modules annotate their `status` (`success`, `skipped`, `error`, `timeout`) and include human-readable error messages.
-* Failures in external tools (e.g., missing binaries or timeouts) are surfaced in respective sections.
+### Webhook Integration
+```python
+# For CI/CD webhook integration
+results = await trigger_enhanced_security_scan(
+    repo_name="user/repo",
+    branch="main",
+    commit_id="abc123",
+    clone_url="https://github.com/user/repo.git"
+)
+```
 
-## Extensibility
+## IDOR Detection Rules
 
-* Configuration-driven: add/remove rulesets, adjust thresholds, plug in API keys.
-* New scan types can be integrated by following existing pattern: gather raw data, classify risk, update summary/recommendations.
+The scanner includes custom Semgrep rules for detecting IDOR vulnerabilities:
 
-## Testing Recommendations
+- **Direct Object Access**: Detects unprotected database queries using user input
+- **Missing Authorization**: Identifies object access without ownership validation
+- **Parameter Manipulation**: Catches unsafe use of user-controlled parameters
+- **File Path Manipulation**: Detects potential path traversal vulnerabilities
+- **API Endpoint Exposure**: Identifies unprotected API endpoints
+- **Session Manipulation**: Detects session-based IDOR risks
 
-* Mock external tool outputs to unit test classification logic (`calculate_risk_level`, `classify_sast_risk`, `classify_idor_risk`, etc.).
-* Use temporary repositories with known vulnerable patterns to validate end-to-end behavior.
+## Output Format
 
-## Contribution
+### Risk Levels
+- **CRITICAL**: Immediate security threat requiring deployment block
+- **HIGH**: Significant security risk requiring prompt attention
+- **MEDIUM**: Moderate risk requiring monitoring and scheduled fixes
+- **LOW**: Minor security concerns
+- **INFO**: Informational findings
 
-* Follow existing style: explicit risk mapping, clear reasoning strings.
-* Add new rules by extending `semgrep_config` or augmenting classification helpers.
-* Update the recommendation generator to handle new scan types consistently.
+### Actions
+- **BLOCK**: Prevent deployment due to critical security issues
+- **WARN**: Allow deployment with warnings about security risks
+- **MONITOR**: Deploy with continued monitoring of identified issues
+- **IGNORE**: Proceed without security concerns
 
-## Limitations / Notes
+### Report Structure
+```json
+{
+  "timestamp": "2024-01-01T12:00:00Z",
+  "sca": {
+    "findings": [],
+    "risk_summary": {"CRITICAL": 0, "HIGH": 2, "MEDIUM": 5, "LOW": 1},
+    "actions": {"BLOCK": 0, "WARN": 2, "MONITOR": 5, "IGNORE": 1}
+  },
+  "secrets": { /* ... */ },
+  "sast": { /* ... */ },
+  "idor": {
+    "findings": [],
+    "rules_used": ["p/owasp-top-10", "custom_idor_rules"],
+    "risk_summary": { /* ... */ }
+  },
+  "summary": {
+    "overall_decision": "WARN",
+    "risk_score": 65.2,
+    "deployment_recommendation": "PROCEED WITH CAUTION: 2 high-risk issues found"
+  },
+  "recommendations": []
+}
+```
 
-* External tools must be installed and available in `PATH`; missing tools result in errors in their section.
-* CVE enrichment depends on NVD availability and respects rate limiting.
-* IDOR rule heuristics are pattern-based and may require tuning for project-specific frameworks.
+## Integration
 
+### CI/CD Pipeline Integration
+The scanner can be integrated into CI/CD pipelines to automatically assess security risks:
+
+1. **GitHub Actions**: Add as a workflow step
+2. **Jenkins**: Include in pipeline scripts
+3. **GitLab CI**: Add to `.gitlab-ci.yml`
+4. **Azure DevOps**: Include in pipeline YAML
+
+### Webhook Support
+Supports webhook integration for automatic scanning on repository events:
+
+```python
+# Example webhook handler
+@app.post("/webhook/security-scan")
+async def handle_webhook(payload: dict):
+    results = await trigger_enhanced_security_scan(
+        repo_name=payload["repository"]["full_name"],
+        branch=payload["ref"].split("/")[-1],
+        commit_id=payload["head_commit"]["id"]
+    )
+    return results
+```
+
+## Limitations
+
+- SCA scanning requires `requirements.txt` files for Python projects
+- CVE lookup requires internet connectivity for real-time data
+- Semgrep IDOR detection is primarily designed for Python codebases
+- API rate limits may apply for CVE data fetching without API keys
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
+
+
+
+## Support
+
+For issues, questions, or contributions, please create an issue in the project repository.
