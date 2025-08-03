@@ -6,6 +6,7 @@ import asyncio
 from security_scanner import trigger_security_scan
 
 # TODO: Use environment variable or config file
+# 7780ccfb32a33df7f884e85353033070bf7e4a724e39dc0760bb2fb66849100e
 GITHUB_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET", "7780ccfb32a33df7f884e85353033070bf7e4a724e39dc0760bb2fb66849100e")
 
 async def handle_github_event(payload_bytes: bytes, headers: dict):

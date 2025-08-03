@@ -1,0 +1,412 @@
+{
+  "timestamp": "2025-07-30T12:32:03.368971",
+  "sca": {
+    "tool": "safety",
+    "vulnerabilities": {
+      "report_meta": {
+        "scan_target": "files",
+        "scanned": [
+          "/tmp/tmpmzmubj0h/main/requirements.txt"
+        ],
+        "policy_file": null,
+        "policy_file_source": "local",
+        "api_key": false,
+        "local_database_path": null,
+        "safety_version": "2.3.5",
+        "timestamp": "2025-07-30 12:32:22",
+        "packages_found": 5,
+        "vulnerabilities_found": 5,
+        "vulnerabilities_ignored": 0,
+        "remediations_recommended": 0,
+        "telemetry": {
+          "os_type": "Linux",
+          "os_release": "6.12.32-amd64",
+          "os_description": "Linux-6.12.32-amd64-x86_64-with-glibc2.36",
+          "python_version": "3.11.2",
+          "safety_command": "check",
+          "safety_options": {
+            "json": {
+              "--json": 1
+            },
+            "files": {
+              "--file": 1
+            }
+          },
+          "safety_version": "2.3.5",
+          "safety_source": "cli"
+        },
+        "git": {
+          "branch": "main",
+          "tag": "",
+          "commit": "ac3a44b7212413913c3acde92d5eb4c6765bc43a",
+          "dirty": false,
+          "origin": "https://github.com/madhavanrx18/Secure-ci-cd.git"
+        },
+        "project": null,
+        "json_version": 1
+      },
+      "scanned_packages": {
+        "Flask": {
+          "name": "Flask",
+          "version": "2.3.3"
+        },
+        "GitPython": {
+          "name": "GitPython",
+          "version": "3.1.37"
+        },
+        "requests": {
+          "name": "requests",
+          "version": "2.31.0"
+        },
+        "safety": {
+          "name": "safety",
+          "version": "2.3.5"
+        },
+        "bandit": {
+          "name": "bandit",
+          "version": "1.7.5"
+        }
+      },
+      "affected_packages": {
+        "Flask": {
+          "name": "Flask",
+          "version": "2.3.3",
+          "found": "/tmp/tmpmzmubj0h/main/requirements.txt",
+          "insecure_versions": [],
+          "secure_versions": [],
+          "latest_version_without_known_vulnerabilities": null,
+          "latest_version": null,
+          "more_info_url": "https://data.safetycli.com"
+        },
+        "GitPython": {
+          "name": "GitPython",
+          "version": "3.1.37",
+          "found": "/tmp/tmpmzmubj0h/main/requirements.txt",
+          "insecure_versions": [],
+          "secure_versions": [],
+          "latest_version_without_known_vulnerabilities": null,
+          "latest_version": null,
+          "more_info_url": "https://data.safetycli.com"
+        },
+        "requests": {
+          "name": "requests",
+          "version": "2.31.0",
+          "found": "/tmp/tmpmzmubj0h/main/requirements.txt",
+          "insecure_versions": [],
+          "secure_versions": [],
+          "latest_version_without_known_vulnerabilities": null,
+          "latest_version": null,
+          "more_info_url": "https://data.safetycli.com"
+        },
+        "bandit": {
+          "name": "bandit",
+          "version": "1.7.5",
+          "found": "/tmp/tmpmzmubj0h/main/requirements.txt",
+          "insecure_versions": [],
+          "secure_versions": [],
+          "latest_version_without_known_vulnerabilities": null,
+          "latest_version": null,
+          "more_info_url": "https://data.safetycli.com"
+        }
+      },
+      "announcements": [],
+      "vulnerabilities": [
+        {
+          "vulnerability_id": "77323",
+          "package_name": "flask",
+          "ignored": {},
+          "ignored_reason": null,
+          "ignored_expires": null,
+          "vulnerable_spec": "<3.1.1",
+          "all_vulnerable_specs": [
+            "<3.1.1"
+          ],
+          "analyzed_version": "2.3.3",
+          "advisory": "Affected versions of Flask (\u2264 3.1.0) are vulnerable to incorrect fallback key configuration in session signing, leading to stale key usage instead of the intended current key. This flaw undermines session integrity, enabling remote attackers to forge or tamper with cookies via manipulated SECRET_KEY_FALLBACKS parameters. The vulnerability exists in the itsdangerous-based signing routines within flask.sessions (fallback key list ordering).",
+          "is_transitive": false,
+          "published_date": null,
+          "fixed_versions": [],
+          "closest_versions_without_known_vulnerabilities": [],
+          "resources": [],
+          "CVE": "CVE-2025-47278",
+          "severity": null,
+          "affected_versions": [],
+          "more_info_url": "https://data.safetycli.com/v/77323/f17"
+        },
+        {
+          "vulnerability_id": "63687",
+          "package_name": "gitpython",
+          "ignored": {},
+          "ignored_reason": null,
+          "ignored_expires": null,
+          "vulnerable_spec": "<3.1.41",
+          "all_vulnerable_specs": [
+            "<3.1.41"
+          ],
+          "analyzed_version": "3.1.37",
+          "advisory": "GitPython 3.1.41 fixes a vulnerability (CVE-2024-22190) involving an untrusted search path issue on Windows, which could allow execution of malicious git.exe or bash.exe from untrusted repositories. This update addresses the incomplete fix from CVE-2023-40590. \r\n#It only affects Windows users\r\nhttps://github.com/gitpython-developers/GitPython/security/advisories/GHSA-2mqj-m65w-jghx",
+          "is_transitive": false,
+          "published_date": null,
+          "fixed_versions": [],
+          "closest_versions_without_known_vulnerabilities": [],
+          "resources": [],
+          "CVE": "CVE-2024-22190",
+          "severity": null,
+          "affected_versions": [],
+          "more_info_url": "https://data.safetycli.com/v/63687/f17"
+        },
+        {
+          "vulnerability_id": "77680",
+          "package_name": "requests",
+          "ignored": {},
+          "ignored_reason": null,
+          "ignored_expires": null,
+          "vulnerable_spec": "<2.32.4",
+          "all_vulnerable_specs": [
+            "<2.32.4"
+          ],
+          "analyzed_version": "2.31.0",
+          "advisory": "Requests is an HTTP library. Due to a URL parsing issue, Requests releases prior to 2.32.4 may leak .netrc credentials to third parties for specific maliciously-crafted URLs. Users should upgrade to version 2.32.4 to receive a fix. For older versions of Requests, use of the .netrc file can be disabled with `trust_env=False` on one's Requests Session.",
+          "is_transitive": false,
+          "published_date": null,
+          "fixed_versions": [],
+          "closest_versions_without_known_vulnerabilities": [],
+          "resources": [],
+          "CVE": "CVE-2024-47081",
+          "severity": null,
+          "affected_versions": [],
+          "more_info_url": "https://data.safetycli.com/v/77680/f17"
+        },
+        {
+          "vulnerability_id": "71064",
+          "package_name": "requests",
+          "ignored": {},
+          "ignored_reason": null,
+          "ignored_expires": null,
+          "vulnerable_spec": "<2.32.2",
+          "all_vulnerable_specs": [
+            "<2.32.2"
+          ],
+          "analyzed_version": "2.31.0",
+          "advisory": "Affected versions of Requests, when making requests through a Requests `Session`, if the first request is made with `verify=False` to disable cert verification, all subsequent requests to the same host will continue to ignore cert verification regardless of changes to the value of `verify`. This behavior will continue for the lifecycle of the connection in the connection pool. Requests 2.32.0 fixes the issue, but versions 2.32.0 and 2.32.1 were yanked due to conflicts with CVE-2024-35195 mitigation.",
+          "is_transitive": false,
+          "published_date": null,
+          "fixed_versions": [],
+          "closest_versions_without_known_vulnerabilities": [],
+          "resources": [],
+          "CVE": "CVE-2024-35195",
+          "severity": null,
+          "affected_versions": [],
+          "more_info_url": "https://data.safetycli.com/v/71064/f17"
+        },
+        {
+          "vulnerability_id": "64484",
+          "package_name": "bandit",
+          "ignored": {},
+          "ignored_reason": null,
+          "ignored_expires": null,
+          "vulnerable_spec": "<1.7.7",
+          "all_vulnerable_specs": [
+            "<1.7.7"
+          ],
+          "analyzed_version": "1.7.5",
+          "advisory": "Bandit 1.7.7 identifies the str.replace method as a potential risk for SQL injection because it can be misused in constructing SQL queries, potentially enabling the execution of arbitrary SQL code.\r\nhttps://github.com/PyCQA/bandit/pull/1044/commits/d909043ba20853c90a7cad4a5b58a180f6937bf8",
+          "is_transitive": false,
+          "published_date": null,
+          "fixed_versions": [],
+          "closest_versions_without_known_vulnerabilities": [],
+          "resources": [],
+          "CVE": null,
+          "severity": null,
+          "affected_versions": [],
+          "more_info_url": "https://data.safetycli.com/v/64484/f17"
+        }
+      ],
+      "ignored_vulnerabilities": [],
+      "remediations": {
+        "flask": {
+          "current_version": "2.3.3",
+          "vulnerabilities_found": 1,
+          "recommended_version": null,
+          "other_recommended_versions": [],
+          "more_info_url": "https://data.safetycli.com/?from=2.3.3"
+        },
+        "gitpython": {
+          "current_version": "3.1.37",
+          "vulnerabilities_found": 1,
+          "recommended_version": null,
+          "other_recommended_versions": [],
+          "more_info_url": "https://data.safetycli.com/?from=3.1.37"
+        },
+        "requests": {
+          "current_version": "2.31.0",
+          "vulnerabilities_found": 2,
+          "recommended_version": null,
+          "other_recommended_versions": [],
+          "more_info_url": "https://data.safetycli.com/?from=2.31.0"
+        },
+        "bandit": {
+          "current_version": "1.7.5",
+          "vulnerabilities_found": 1,
+          "recommended_version": null,
+          "other_recommended_versions": [],
+          "more_info_url": "https://data.safetycli.com/?from=1.7.5"
+        }
+      }
+    },
+    "findings": [],
+    "risk_summary": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 0
+    },
+    "actions": {
+      "BLOCK": 0,
+      "WARN": 0,
+      "MONITOR": 0,
+      "IGNORE": 0
+    },
+    "status": "error",
+    "error": "'str' object has no attribute 'get'"
+  },
+  "secrets": {
+    "tool": "gitleaks",
+    "findings": [],
+    "risk_summary": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 0
+    },
+    "actions": {
+      "BLOCK": 0,
+      "WARN": 0,
+      "MONITOR": 0,
+      "IGNORE": 0
+    },
+    "status": "success",
+    "error": null
+  },
+  "sast": {
+    "tool": "bandit",
+    "issues": [
+      {
+        "code": "82         port=5000,\n83         debug=True,\n84         threaded=True\n85     )\n",
+        "col_offset": 4,
+        "end_col_offset": 5,
+        "filename": "/tmp/tmpmzmubj0h/main/flask-webhook-server.py",
+        "issue_confidence": "MEDIUM",
+        "issue_cwe": {
+          "id": 94,
+          "link": "https://cwe.mitre.org/data/definitions/94.html"
+        },
+        "issue_severity": "HIGH",
+        "issue_text": "A Flask app appears to be run with debug=True, which exposes the Werkzeug debugger and allows the execution of arbitrary code.",
+        "line_number": 83,
+        "line_range": [
+          80,
+          81,
+          82,
+          83,
+          84,
+          85
+        ],
+        "more_info": "https://bandit.readthedocs.io/en/1.7.5/plugins/b201_flask_debug_true.html",
+        "test_id": "B201",
+        "test_name": "flask_debug_true"
+      },
+      {
+        "code": "80     app.run(\n81         host='0.0.0.0',\n82         port=5000,\n",
+        "col_offset": 13,
+        "end_col_offset": 22,
+        "filename": "/tmp/tmpmzmubj0h/main/flask-webhook-server.py",
+        "issue_confidence": "MEDIUM",
+        "issue_cwe": {
+          "id": 605,
+          "link": "https://cwe.mitre.org/data/definitions/605.html"
+        },
+        "issue_severity": "MEDIUM",
+        "issue_text": "Possible binding to all interfaces.",
+        "line_number": 81,
+        "line_range": [
+          81
+        ],
+        "more_info": "https://bandit.readthedocs.io/en/1.7.5/plugins/b104_hardcoded_bind_all_interfaces.html",
+        "test_id": "B104",
+        "test_name": "hardcoded_bind_all_interfaces"
+      }
+    ],
+    "findings": [
+      {
+        "tool": "bandit",
+        "test_id": "B201",
+        "test_name": "flask_debug_true",
+        "file_path": "/tmp/tmpmzmubj0h/main/flask-webhook-server.py",
+        "line_number": 83,
+        "issue_severity": "HIGH",
+        "issue_confidence": "MEDIUM",
+        "risk_level": "MEDIUM",
+        "action": "MONITOR",
+        "reasoning": "Bandit severity: HIGH, confidence: MEDIUM",
+        "description": "A Flask app appears to be run with debug=True, which exposes the Werkzeug debugger and allows the execution of arbitrary code.",
+        "code": "82         port=5000,\n83         debug=True,\n84         threaded=True\n85     )\n"
+      },
+      {
+        "tool": "bandit",
+        "test_id": "B104",
+        "test_name": "hardcoded_bind_all_interfaces",
+        "file_path": "/tmp/tmpmzmubj0h/main/flask-webhook-server.py",
+        "line_number": 81,
+        "issue_severity": "MEDIUM",
+        "issue_confidence": "MEDIUM",
+        "risk_level": "LOW",
+        "action": "IGNORE",
+        "reasoning": "Bandit severity: MEDIUM, confidence: MEDIUM",
+        "description": "Possible binding to all interfaces.",
+        "code": "80     app.run(\n81         host='0.0.0.0',\n82         port=5000,\n"
+      }
+    ],
+    "risk_summary": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 1,
+      "LOW": 1
+    },
+    "actions": {
+      "BLOCK": 0,
+      "WARN": 0,
+      "MONITOR": 1,
+      "IGNORE": 1
+    },
+    "status": "success",
+    "error": null
+  },
+  "summary": {
+    "total_risks": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 1,
+      "LOW": 1
+    },
+    "total_actions": {
+      "BLOCK": 0,
+      "WARN": 0,
+      "MONITOR": 1,
+      "IGNORE": 1
+    },
+    "overall_decision": "MONITOR",
+    "risk_score": 25.0,
+    "deployment_recommendation": "\ud83d\udcca DEPLOY WITH MONITORING: 1 medium-risk issues to monitor"
+  },
+  "risk_assessment": {
+    "assessment_timestamp": "2025-07-30T12:32:22.248794",
+    "methodology": "CVE-based risk scoring with contextual adjustments",
+    "risk_factors": {
+      "cve_scores_used": 0,
+      "recent_cves": 0,
+      "high_exploitability": 0
+    }
+  },
+  "recommendations": []
+}
