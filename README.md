@@ -1,8 +1,8 @@
-# Enhanced Security Scanner
+# CI CD Security Scanner
 
 ## Overview
 
-**Enhanced Security Scanner** is a composite security analysis tool combining:
+**CI CD Security Scanner** is a composite security analysis tool combining:
 
 * Software Composition Analysis (SCA) with CVE contextual scoring
 * Static Application Security Testing (SAST)
@@ -214,6 +214,3 @@ asyncio.run(run())
 * CVE enrichment depends on NVD availability and respects rate limiting.
 * IDOR rule heuristics are pattern-based and may require tuning for project-specific frameworks.
 
-## License
-
-*Specify your license here (e.g., MIT, Apache 2.0) or add a `LICENSE` file.*
