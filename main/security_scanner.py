@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-"""
-Enhanced DevSecOps Security Scanner with CVE Scoring
-Implements SCA, Secrets Scanning, and SAST checks with intelligent CVE-based risk assessment
-Integrated with existing FastAPI webhook infrastructure
-"""
-
 import os
 import json
 import asyncio
@@ -17,50 +10,12 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
-from enum import Enum
 import requests
 import git
+from security_models import RiskLevel, Action, CVEInfo, VulnerabilityFinding
+import uuid
 
-class RiskLevel(Enum):
-    CRITICAL = "CRITICAL"
-    HIGH = "HIGH"
-    MEDIUM = "MEDIUM"
-    LOW = "LOW"
-    INFO = "INFO"
-
-class Action(Enum):
-    BLOCK = "BLOCK"           # Block deployment
-    WARN = "WARN"             # Allow but warn
-    IGNORE = "IGNORE"         # Ignore finding
-    MONITOR = "MONITOR"       # Continue monitoring
-
-@dataclass
-class CVEInfo:
-    cve_id: str
-    cvss_score: float
-    cvss_vector: str
-    severity: str
-    description: str
-    published_date: str
-    last_modified: str
-    references: List[str]
-    exploitability_score: float = 0.0
-    impact_score: float = 0.0
-
-@dataclass
-class VulnerabilityFinding:
-    tool: str
-    vulnerability_id: str
-    package_name: str
-    current_version: str
-    fixed_version: Optional[str]
-    cve_info: Optional[CVEInfo]
-    risk_level: RiskLevel
-    action: Action
-    reasoning: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
+ 
 
 class EnhancedSecurityScanner:
     def __init__(self, config_path: str = None):
@@ -71,6 +26,7 @@ class EnhancedSecurityScanner:
             'sca': {},
             'secrets': {},
             'sast': {},
+            'sbom': {},
             'summary': {},
             'risk_assessment': {},
             'recommendations': []
@@ -86,22 +42,22 @@ class EnhancedSecurityScanner:
             },
             'risk_thresholds': {
                 # CVE Score based thresholds
-                'critical_cvss_min': 9.0,      # CVSS 9.0+ = CRITICAL
-                'high_cvss_min': 7.0,          # CVSS 7.0-8.9 = HIGH
-                'medium_cvss_min': 4.0,        # CVSS 4.0-6.9 = MEDIUM
-                'low_cvss_min': 0.1,           # CVSS 0.1-3.9 = LOW
+                'critical_cvss_min': 9.0,      
+                'high_cvss_min': 7.0,          
+                'medium_cvss_min': 4.0,        
+                'low_cvss_min': 0.1,           
                 
                 # Action thresholds
-                'block_on_critical': True,      # Block deployment on CRITICAL
-                'block_on_high_count': 5,       # Block if >5 HIGH severity issues
-                'warn_on_medium_count': 10,     # Warn if >10 MEDIUM severity issues
+                'block_on_critical': True,      
+                'block_on_high_count': 5,       
+                'warn_on_medium_count': 10,     
                 
                 # Age-based risk adjustment
-                'recent_cve_days': 30,          # CVEs published in last 30 days get +1 risk
-                'exploit_multiplier': 1.5,      # Multiply score if exploit exists
+                'recent_cve_days': 30,          
+                'exploit_multiplier': 1.5,      
                 
                 # Secrets thresholds
-                'secrets_max_findings': 0,      # Zero tolerance for secrets
+                'secrets_max_findings': 0,      
                 
                 # SAST thresholds by type
                 'sast_critical_types': ['sql_injection', 'code_injection', 'xss'],
@@ -122,7 +78,7 @@ class EnhancedSecurityScanner:
         return default_config
 
     async def get_cve_info(self, cve_id: str) -> Optional[CVEInfo]:
-        """Fetch CVE information from NVD API with caching"""
+
         if cve_id in self.cve_cache:
             return self.cve_cache[cve_id]
         
@@ -207,7 +163,7 @@ class EnhancedSecurityScanner:
         return None
 
     def calculate_risk_level(self, cve_info: Optional[CVEInfo], context: Dict = None) -> Tuple[RiskLevel, Action, str]:
-        """Calculate risk level and recommended action based on CVE info and context"""
+        
         if not cve_info:
             return RiskLevel.LOW, Action.IGNORE, "No CVE information available"
         
@@ -278,8 +234,97 @@ class EnhancedSecurityScanner:
             # Find requirements files
             req_files = list(Path(repo_path).rglob('requirements*.txt'))
             if not req_files:
-                sca_results['status'] = 'skipped'
-                sca_results['error'] = 'No requirements.txt found'
+                # If no requirements file, generate SBOM instead
+                try:
+                    sbom = self.generate_sbom_from_requirements(repo_path)
+                    self.results['sbom'] = sbom
+                    components = sbom.get('components', [])
+                    # 1) Try Safety against a temporary requirements.txt synthesized from SBOM in repo root
+                    tmp_req = None
+                    try:
+                        repo_req_path = Path(repo_path) / 'requirements.txt'
+                        created_repo_req = False
+                        if not repo_req_path.exists():
+                            created_repo_req = True
+                            tmp_req = str(repo_req_path)
+                        else:
+                            # fallback to a uniquely named temp file inside repo
+                            tmp_req = str(Path(repo_path) / f"requirements_sbom_{uuid.uuid4().hex}.txt")
+                        with open(tmp_req, 'w') as tf:
+                            for comp in components:
+                                name = comp.get('name')
+                                ver = comp.get('version')
+                                if not name:
+                                    continue
+                                line = name
+                                if ver:
+                                    line = f"{name}=={ver}"
+                                tf.write(line + "\n")
+                        result = subprocess.run([
+                            'safety', 'check', '--json', '--file', tmp_req
+                        ], capture_output=True, text=True, cwd=repo_path)
+                        parsed_ok = False
+                        if result.stdout:
+                            try:
+                                vulnerabilities = json.loads(result.stdout)
+                                parsed_ok = True
+                                sca_results['vulnerabilities'] = vulnerabilities
+                                for vuln in vulnerabilities:
+                                    cve_id = None
+                                    for id_item in vuln.get('ids', []) or []:
+                                        if str(id_item).startswith('CVE-'):
+                                            cve_id = id_item
+                                            break
+                                    cve_info = None
+                                    if cve_id:
+                                        cve_info = await self.get_cve_info(cve_id)
+                                    risk_level, action, reasoning = self.calculate_risk_level(cve_info)
+                                    finding = VulnerabilityFinding(
+                                        tool='safety',
+                                        vulnerability_id=cve_id or vuln.get('id', 'Unknown'),
+                                        package_name=vuln.get('package', 'Unknown'),
+                                        current_version=vuln.get('installed_version', 'Unknown'),
+                                        fixed_version=vuln.get('fixed_in', None),
+                                        cve_info=cve_info,
+                                        risk_level=risk_level,
+                                        action=action,
+                                        reasoning=reasoning
+                                    )
+                                    sca_results['findings'].append(finding.__dict__)
+                                    sca_results['risk_summary'][risk_level.value] += 1
+                                    sca_results['actions'][action.value] += 1
+                                sca_results['status'] = 'success'
+                                sca_results['error'] = None
+                            except json.JSONDecodeError:
+                                parsed_ok = False
+                        if not parsed_ok:
+                            raise RuntimeError('Safety parsing failed or empty output')
+                    finally:
+                        try:
+                            if tmp_req and os.path.exists(tmp_req):
+                                # Only clean up if we created it; don't delete user's real requirements.txt
+                                if 'requirements_sbom_' in Path(tmp_req).name or created_repo_req:
+                                    os.remove(tmp_req)
+                        except Exception:
+                            pass
+                    
+                except Exception as safety_sbom_err:
+                    # 2) Fallback to OSV if Safety path failed
+                    try:
+                        components = self.results.get('sbom', {}).get('components', [])
+                        osv_findings = await self._run_osv_sca_from_sbom(components)
+                        for finding in osv_findings:
+                            sca_results['findings'].append(finding)
+                            risk = finding.get('risk_level') or 'LOW'
+                            action = finding.get('action') or 'IGNORE'
+                            sca_results['risk_summary'][risk] += 1
+                            sca_results['actions'][action] += 1
+                        sca_results['tool'] = 'osv'
+                        sca_results['status'] = 'success'
+                        sca_results['error'] = None
+                    except Exception as osv_err:
+                        sca_results['status'] = 'skipped'
+                        sca_results['error'] = f'No requirements.txt found; Safety-from-SBOM failed: {safety_sbom_err}; OSV fallback failed: {osv_err}'
                 return sca_results
             
             # Run safety check
@@ -333,6 +378,57 @@ class EnhancedSecurityScanner:
             sca_results['error'] = str(e)
         
         return sca_results
+
+    async def _run_osv_sca_from_sbom(self, components: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Query OSV for each PyPI component from SBOM and convert to findings."""
+        findings: List[Dict[str, Any]] = []
+        if not components:
+            return findings
+        
+        async with aiohttp.ClientSession() as session:
+            for comp in components:
+                name = comp.get('name')
+                version = comp.get('version')
+                if not name or not version:
+                    continue
+                try:
+                    payload = {
+                        'package': {'ecosystem': 'PyPI', 'name': name},
+                        'version': version
+                    }
+                    async with session.post('https://api.osv.dev/v1/query', json=payload) as resp:
+                        if resp.status != 200:
+                            continue
+                        data = await resp.json()
+                        vulns = data.get('vulns', [])
+                        for v in vulns:
+                            cve_id = None
+                            # prefer CVE id if present
+                            for alias in v.get('aliases', []) or []:
+                                if str(alias).startswith('CVE-'):
+                                    cve_id = alias
+                                    break
+                            cve_info = None
+                            if cve_id:
+                                cve_info = await self.get_cve_info(cve_id)
+                            # Fallback severity if no CVE info
+                            risk_level, action, reasoning = self.calculate_risk_level(cve_info)
+                            finding = {
+                                'tool': 'osv',
+                                'vulnerability_id': cve_id or v.get('id', 'OSV'),
+                                'package_name': name,
+                                'current_version': version,
+                                'fixed_version': None,
+                                'cve_info': cve_info.__dict__ if cve_info else None,
+                                'risk_level': risk_level.value,
+                                'action': action.value,
+                                'reasoning': reasoning or 'OSV vulnerability detected'
+                            }
+                            findings.append(finding)
+                except Exception:
+                    # Continue with other components
+                    continue
+        return findings
 
     def run_enhanced_secrets_check(self, repo_path: str) -> Dict[str, Any]:
         """Enhanced secrets scanning with risk assessment"""
@@ -494,6 +590,13 @@ class EnhancedSecurityScanner:
             # Clone repository
             repo_path = self.clone_repository(repo_url, branch)
             
+            # Generate SBOM from repository (requirements files)
+            try:
+                self.results['sbom'] = self.generate_sbom_from_requirements(repo_path)
+            except Exception as sbom_err:
+                # Non-fatal; continue other scans
+                self.results['sbom'] = {'status': 'error', 'error': str(sbom_err)}
+        
             # Run security checks in parallel (SCA needs async for CVE lookups)
             sca_task = self.run_enhanced_sca_check(repo_path)
             
@@ -517,6 +620,81 @@ class EnhancedSecurityScanner:
             # Cleanup
             if repo_path and os.path.exists(repo_path):
                 shutil.rmtree(repo_path, ignore_errors=True)
+
+    def generate_sbom_from_requirements(self, repo_path: str) -> Dict[str, Any]:
+        """Generate a minimal CycloneDX-like SBOM from requirements files.
+        This avoids external dependencies by parsing requirements*.txt.
+        """
+        print("Generating SBOM from requirements files...")
+        requirements_files: List[Path] = []
+        for root, _, files in os.walk(repo_path):
+            for fname in files:
+                lower = fname.lower()
+                if lower.startswith('requirements') and lower.endswith('.txt'):
+                    requirements_files.append(Path(root) / fname)
+        
+        components: List[Dict[str, Any]] = []
+        seen: set = set()
+        
+        def parse_req_line(line: str) -> Tuple[str, Optional[str]]:
+            # Strip comments and options
+            line = line.split('#', 1)[0].strip()
+            if not line or line.startswith('-'):
+                return '', None
+            # Common specifiers: ==, >=, <=, ~=, >, <, ===
+            for sep in ['===', '==', '>=', '<=', '~=', '>', '<']:
+                if sep in line:
+                    name, ver = line.split(sep, 1)
+                    return name.strip(), ver.strip() or None
+            # No version pinned
+            return line.strip(), None
+        
+        for req_file in requirements_files:
+            try:
+                with open(req_file, 'r') as f:
+                    for raw in f:
+                        name, ver = parse_req_line(raw)
+                        if not name:
+                            continue
+                        key = (name.lower(), ver or '')
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        purl = None
+                        if ver:
+                            purl = f"pkg:pypi/{name}@{ver}"
+                        else:
+                            purl = f"pkg:pypi/{name}"
+                        components.append({
+                            'type': 'library',
+                            'name': name,
+                            'version': ver,
+                            'purl': purl,
+                            'licenses': []
+                        })
+            except Exception as e:
+                # Continue with other files
+                print(f"SBOM: failed to read {req_file}: {e}")
+                continue
+        
+        bom: Dict[str, Any] = {
+            'bomFormat': 'CycloneDX',
+            'specVersion': '1.5',
+            'serialNumber': f"urn:uuid:{uuid.uuid4()}",
+            'version': 1,
+            'metadata': {
+                'timestamp': datetime.now().isoformat(),
+                'tools': [{'vendor': 'Secure-ci-cd', 'name': 'EnhancedSecurityScanner', 'version': 'internal'}],
+                'component': {
+                    'type': 'application',
+                    'name': Path(repo_path).name
+                }
+            },
+            'components': components,
+            'componentCount': len(components),
+            'status': 'success' if components else 'empty'
+        }
+        return bom
 
     def clone_repository(self, repo_url: str, branch: str = 'main') -> str:
         """Clone repository to temporary directory"""
@@ -728,8 +906,7 @@ if __name__ == "__main__":
         scanner = EnhancedSecurityScanner()
         
         # Test with a repository
-        repo_url = "https://github.com/madhavanrx18/Secure-ci-cd.git"
-        
+        repo_url = "https://github.com/madhavanrx18/Secure-ci-cd"
         print("🔍 Starting Enhanced Security Scan with CVE Analysis...")
         print("=" * 60)
         

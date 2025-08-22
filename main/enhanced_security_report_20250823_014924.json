@@ -1,0 +1,224 @@
+{
+  "timestamp": "2025-08-23T01:48:57.241782",
+  "sca": {
+    "tool": "safety",
+    "vulnerabilities": [],
+    "findings": [],
+    "risk_summary": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 0
+    },
+    "actions": {
+      "BLOCK": 0,
+      "WARN": 0,
+      "MONITOR": 0,
+      "IGNORE": 0
+    },
+    "status": "skipped",
+    "error": "No requirements.txt found"
+  },
+  "secrets": {
+    "tool": "gitleaks",
+    "findings": [],
+    "risk_summary": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 0
+    },
+    "actions": {
+      "BLOCK": 0,
+      "WARN": 0,
+      "MONITOR": 0,
+      "IGNORE": 0
+    },
+    "status": "success",
+    "error": null
+  },
+  "sast": {
+    "tool": "bandit",
+    "issues": [
+      {
+        "code": "23         # \ud83d\udea8 Vulnerable query (string concatenation)\n24         query = f\"SELECT * FROM users WHERE username = '{user}' AND password = '{password}'\"\n25         cur.execute(query)\n",
+        "col_offset": 16,
+        "end_col_offset": 92,
+        "filename": "/tmp/tmpcos82isq/app.py",
+        "issue_confidence": "LOW",
+        "issue_cwe": {
+          "id": 89,
+          "link": "https://cwe.mitre.org/data/definitions/89.html"
+        },
+        "issue_severity": "MEDIUM",
+        "issue_text": "Possible SQL injection vector through string-based query construction.",
+        "line_number": 24,
+        "line_range": [
+          24
+        ],
+        "more_info": "https://bandit.readthedocs.io/en/1.7.5/plugins/b608_hardcoded_sql_expressions.html",
+        "test_id": "B608",
+        "test_name": "hardcoded_sql_expressions"
+      },
+      {
+        "code": "51         # \ud83d\udea8 Vulnerable query\n52         query = f\"SELECT * FROM users WHERE username LIKE '%{q}%'\"\n53         cur.execute(query)\n",
+        "col_offset": 16,
+        "end_col_offset": 66,
+        "filename": "/tmp/tmpcos82isq/app.py",
+        "issue_confidence": "LOW",
+        "issue_cwe": {
+          "id": 89,
+          "link": "https://cwe.mitre.org/data/definitions/89.html"
+        },
+        "issue_severity": "MEDIUM",
+        "issue_text": "Possible SQL injection vector through string-based query construction.",
+        "line_number": 52,
+        "line_range": [
+          52
+        ],
+        "more_info": "https://bandit.readthedocs.io/en/1.7.5/plugins/b608_hardcoded_sql_expressions.html",
+        "test_id": "B608",
+        "test_name": "hardcoded_sql_expressions"
+      },
+      {
+        "code": "67 if __name__ == \"__main__\":\n68     app.run(debug=True)\n",
+        "col_offset": 4,
+        "end_col_offset": 23,
+        "filename": "/tmp/tmpcos82isq/app.py",
+        "issue_confidence": "MEDIUM",
+        "issue_cwe": {
+          "id": 94,
+          "link": "https://cwe.mitre.org/data/definitions/94.html"
+        },
+        "issue_severity": "HIGH",
+        "issue_text": "A Flask app appears to be run with debug=True, which exposes the Werkzeug debugger and allows the execution of arbitrary code.",
+        "line_number": 68,
+        "line_range": [
+          68
+        ],
+        "more_info": "https://bandit.readthedocs.io/en/1.7.5/plugins/b201_flask_debug_true.html",
+        "test_id": "B201",
+        "test_name": "flask_debug_true"
+      }
+    ],
+    "findings": [
+      {
+        "tool": "bandit",
+        "test_id": "B608",
+        "test_name": "hardcoded_sql_expressions",
+        "file_path": "/tmp/tmpcos82isq/app.py",
+        "line_number": 24,
+        "issue_severity": "MEDIUM",
+        "issue_confidence": "LOW",
+        "risk_level": "LOW",
+        "action": "IGNORE",
+        "reasoning": "Bandit severity: MEDIUM, confidence: LOW",
+        "description": "Possible SQL injection vector through string-based query construction.",
+        "code": "23         # \ud83d\udea8 Vulnerable query (string concatenation)\n24         query = f\"SELECT * FROM users WHERE username = '{user}' AND password = '{password}'\"\n25         cur.execute(query)\n"
+      },
+      {
+        "tool": "bandit",
+        "test_id": "B608",
+        "test_name": "hardcoded_sql_expressions",
+        "file_path": "/tmp/tmpcos82isq/app.py",
+        "line_number": 52,
+        "issue_severity": "MEDIUM",
+        "issue_confidence": "LOW",
+        "risk_level": "LOW",
+        "action": "IGNORE",
+        "reasoning": "Bandit severity: MEDIUM, confidence: LOW",
+        "description": "Possible SQL injection vector through string-based query construction.",
+        "code": "51         # \ud83d\udea8 Vulnerable query\n52         query = f\"SELECT * FROM users WHERE username LIKE '%{q}%'\"\n53         cur.execute(query)\n"
+      },
+      {
+        "tool": "bandit",
+        "test_id": "B201",
+        "test_name": "flask_debug_true",
+        "file_path": "/tmp/tmpcos82isq/app.py",
+        "line_number": 68,
+        "issue_severity": "HIGH",
+        "issue_confidence": "MEDIUM",
+        "risk_level": "MEDIUM",
+        "action": "MONITOR",
+        "reasoning": "Bandit severity: HIGH, confidence: MEDIUM",
+        "description": "A Flask app appears to be run with debug=True, which exposes the Werkzeug debugger and allows the execution of arbitrary code.",
+        "code": "67 if __name__ == \"__main__\":\n68     app.run(debug=True)\n"
+      }
+    ],
+    "risk_summary": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 1,
+      "LOW": 2
+    },
+    "actions": {
+      "BLOCK": 0,
+      "WARN": 0,
+      "MONITOR": 1,
+      "IGNORE": 2
+    },
+    "status": "success",
+    "error": null
+  },
+  "idor": {
+    "tool": "semgrep",
+    "findings": [],
+    "risk_summary": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 0,
+      "LOW": 0
+    },
+    "actions": {
+      "BLOCK": 0,
+      "WARN": 0,
+      "MONITOR": 0,
+      "IGNORE": 0
+    },
+    "rules_used": [
+      "p/owasp-top-10",
+      "p/security-audit",
+      "p/insecure-transport",
+      "custom_idor_rules"
+    ],
+    "status": "success",
+    "error": null
+  },
+  "summary": {
+    "total_risks": {
+      "CRITICAL": 0,
+      "HIGH": 0,
+      "MEDIUM": 1,
+      "LOW": 2
+    },
+    "total_actions": {
+      "BLOCK": 0,
+      "WARN": 0,
+      "MONITOR": 1,
+      "IGNORE": 2
+    },
+    "overall_decision": "MONITOR",
+    "risk_score": 20.0,
+    "deployment_recommendation": "\ud83d\udcca DEPLOY WITH MONITORING: 1 medium-risk issues to monitor",
+    "idor_specific": {
+      "findings_count": 0,
+      "critical_idor": 0,
+      "high_idor": 0
+    }
+  },
+  "risk_assessment": {
+    "assessment_timestamp": "2025-08-23T01:49:14.327158",
+    "methodology": "CVE-based risk scoring with contextual adjustments and IDOR pattern analysis",
+    "risk_factors": {
+      "cve_scores_used": 0,
+      "recent_cves": 0,
+      "high_exploitability": 0
+    },
+    "idor_analysis": {
+      "total_patterns_detected": 0,
+      "pattern_breakdown": {},
+      "high_risk_files": []
+    }
+  },
+  "recommendations": []
+}
